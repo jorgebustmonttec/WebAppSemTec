@@ -1,9 +1,15 @@
-import Image from "next/image";
+
 
 export default function Home() {
   return (
     <div>
-      <p> HOLA MUNDO</p>
+      <main>
+        <a href="/api/auth/login">Login</a>
+      </main>
+      <footer>
+        <p>© 2024</p>
+      </footer>
+      
     </div>
   );
 }
