@@ -25,13 +25,25 @@ export const getAccessToken = async () => {
 };
 
 // Fetch the user's currently playing track
+// Modified function in lib/spotify.js
 export const getNowPlaying = async () => {
-  const { access_token } = await getAccessToken();
-  return axios.get(NOW_PLAYING_ENDPOINT, {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-  });
+  const { access_token } = await getAccessToken(); // Ensure this returns the right token
+  try {
+    const response = await axios.get(NOW_PLAYING_ENDPOINT, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    if (response.status === 204 || response.status > 400) {
+      // 204 means no content, which can happen when no track is playing
+      return null;
+    }
+    return response;
+  } catch (error) {
+    console.error('Error fetching now playing:', error);
+    return null;
+  }
 };
 
 // Fetch the user's top tracks

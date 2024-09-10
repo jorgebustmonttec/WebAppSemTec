@@ -1,21 +1,26 @@
-'use client'
-import { useState, useEffect } from 'react'; // Import React hooks
-import { getNowPlaying } from '../lib/spotify'; // Ensure getNowPlaying is correctly defined in lib/spotify.js
+'use client';
 
-export default function NowPlaying() {
-  const [track, setTrack] = useState(null); // Define state
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import { getNowPlaying } from '../lib/spotify';
+
+export default function SpotifyComponent() {
+  const { data: session } = useSession();
+  const [track, setTrack] = useState(null);
 
   useEffect(() => {
     async function fetchTrack() {
-      try {
-        const response = await getNowPlaying(); // Call API to get now playing track
-        setTrack(response.data); // Update state with the response data
-      } catch (error) {
-        console.error("Error fetching now playing track:", error); 
+      if (session && session.accessToken) {
+        try {
+          const response = await getNowPlaying(session.accessToken); // Pass the access token
+          setTrack(response.data);
+        } catch (error) {
+          console.error("Error fetching now playing track:", error);
+        }
       }
     }
-    fetchTrack(); 
-  }, []); 
+    fetchTrack();
+  }, [session]);
 
   return (
     <div>
