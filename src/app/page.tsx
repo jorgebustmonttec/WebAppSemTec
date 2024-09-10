@@ -1,15 +1,17 @@
-
+import LoginButton from './components/loginButton';
+import { NextUIProvider } from "@nextui-org/react";
 
 export default function Home() {
   return (
+    <NextUIProvider>
     <div>
       <main>
-        <a href="/api/auth/login">Login</a>
+        <LoginButton /> 
       </main>
       <footer>
         <p>© 2024</p>
       </footer>
-      
     </div>
+    </NextUIProvider>
   );
 }
