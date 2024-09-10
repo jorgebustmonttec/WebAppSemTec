@@ -1,10 +1,10 @@
-// app/page.tsx
-import {Button} from '@nextui-org/button'; 
+'use client'
+import { signIn } from 'next-auth/react';
 
-export default function Page() {
+export default function Home() {
   return (
     <div>
-      <Button>Click me</Button>
+      <button onClick={() => signIn('spotify')}>Log in with Spotify</button>
     </div>
-  )
+  );
 }
