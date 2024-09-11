@@ -22,6 +22,7 @@
     "framer-motion": "^11.5.4",
     "next": "14.2.9",
     "next-auth": "^4.24.7",
+    "oracle-nosqldb": "^5.5.2",
     "react": "^18",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18",
