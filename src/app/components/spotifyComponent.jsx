@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists } from '../lib/spotify';
+import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists} from '../lib/spotify';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import React from "react";
-import { Avatar, Card, CardBody, Image, Button, Slider } from '@nextui-org/react'; // Importar Avatar de NextUI
+import { Avatar, Card, CardBody, Image} from '@nextui-org/react'; 
 
 export default function SpotifyComponent() {
   const { data: session } = useSession();
@@ -87,7 +87,7 @@ export default function SpotifyComponent() {
                       <strong>{profile.display_name}</strong>
                     </h2>
                     <p style={{ color: "#FFFFFF", fontSize: "14px", marginBottom: "10px" }}>Email: {profile.email}</p>
-                    <img
+                    <Image
                       src={profile.images[0]?.url}
                       alt="Profile picture"
                       width="100"
@@ -142,7 +142,7 @@ export default function SpotifyComponent() {
                         </h4>
                         <p style={{ color: "#FFFFFF", fontSize: "14px" }}>Artist: {album.album.artists[0].name}</p>
                       </div>
-                      <img
+                      <Image
                         src={album.album.images[0]?.url}
                         alt="Album cover"
                         width="100"
