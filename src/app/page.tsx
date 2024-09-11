@@ -3,6 +3,7 @@ import LoginButton from './components/loginButton';
 import { NextUIProvider } from "@nextui-org/react";
 import SpotifyComponent from './components/spotifyComponent';
 import { useSession } from 'next-auth/react';
+import SearchBar from './components/searchBar';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -16,6 +17,9 @@ export default function Home() {
           <main className="p-10">
             <div className="absolute top-5 right-1/2 transform translate-x-1/2 flex items-center">
               <h1 className="text-4xl font-bold text-white">Factorify</h1>
+            </div>
+            <div>
+            <SearchBar />
             </div>
             <div className="absolute top-5 right-5 flex items-center">
               <LoginButton />
@@ -33,6 +37,7 @@ export default function Home() {
   }
 
   return (
+
     <div className="relative min-h-screen bg-black text-white">
       <div className="absolute top-5 right-1/2 transform translate-x-1/2 flex items-center">
         <h1 className="text-4xl font-bold text-white">Factorify</h1>

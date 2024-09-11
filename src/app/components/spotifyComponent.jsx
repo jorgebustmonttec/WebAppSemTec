@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists } from '../lib/spotify';
+import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists} from '../lib/spotify';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import React from "react";
-import { Avatar, Card, CardBody, Image, Button, Slider } from '@nextui-org/react'; // Importar Avatar de NextUI
+import { Avatar, Card, CardBody, Image, Button, Slider } from '@nextui-org/react'; 
 
 export default function SpotifyComponent() {
   const { data: session } = useSession();

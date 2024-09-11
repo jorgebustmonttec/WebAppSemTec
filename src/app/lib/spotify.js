@@ -41,3 +41,15 @@ export async function getTopArtists(token) {
     },
   });
 }
+
+export async function getSearchItems(token, query) {
+  return axios.get(`${API_BASE_URL}/search`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    params: {
+      q: query,
+      type: 'track',
+    }
+  });
+}
