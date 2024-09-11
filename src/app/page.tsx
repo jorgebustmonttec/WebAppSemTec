@@ -5,7 +5,6 @@ import { NextUIProvider } from '@nextui-org/react';
 import SpotifyComponent from './components/spotifyComponent';
 import { useSession } from 'next-auth/react';
 import SearchBar from './components/searchBar';
-import Playlists from './components/Playlists';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -26,19 +25,6 @@ export default function Home() {
           <div className="absolute top-5 right-5 flex items-center">
             <LoginButton />
           </div>
-          {status === 'authenticated' && (
-            <>
-              <button
-                className="bg-green-500 p-2 rounded"
-                onClick={() => setShowPlaylists(!showPlaylists)}
-              >
-                {showPlaylists ? 'Hide Playlists' : 'Show Playlists'}
-              </button>
-              {showPlaylists && session.accessToken && (
-                <Playlists accessToken={session.accessToken} />
-              )}
-            </>
-          )}
           <div className="mt-24">
             <SpotifyComponent />
           </div>
