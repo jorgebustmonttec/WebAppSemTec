@@ -57,6 +57,7 @@ export async function getSearchItems(token, query) {
   });
 }
 
+
 export async function getPlaylists(token) {
   try {
     const response = await axios.get(`${API_BASE_URL}/me/playlists`, {
@@ -71,17 +72,18 @@ export async function getPlaylists(token) {
   }
 }
 
+// Función para agregar una canción a una playlist
 export async function addTrackToPlaylist(token, playlistId, trackId) {
   return axios.post(
-    `${API_BASE_URL}/playlists/${playlistId}/${trackId}`,
+    `https://api.spotify.com/v1/playlists/${playlistId}/tracks`,
+    {
+      uris: [`spotify:track:${trackId}`],
+    },
     {
       headers: {
         Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-      params: {
-        playlistId: playlistId,
-        trackId: trackId,
-      }
     }
   );
 }

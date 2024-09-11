@@ -1,27 +1,34 @@
+// searchbar.jsx
 'use client';
+
 import React, { useEffect, useState } from 'react';
-import { getSearchItems, getPlaylists, addTrackToPlaylist } from '../lib/spotify'; 
+import { getSearchItems, addTrackToPlaylist } from '../lib/spotify'; 
 import { useSession } from 'next-auth/react';
-import { Input } from "@nextui-org/input";
-import {Image} from '@nextui-org/react';
-import { Button } from '@nextui-org/react';
+import { Input } from "@nextui-org/react";
+import axios from 'axios';
 
 const SearchBar = () => {
   const { data: session } = useSession();
   const [searchResults, setSearchResults] = useState([]);
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState(query);
+  const [showPlaylists, setShowPlaylists] = useState(false);
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedTrack, setSelectedTrack] = useState(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
+  // Debounce the query to prevent frequent API calls
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(query);
-    }, 500); 
+    }, 500);
 
     return () => {
       clearTimeout(handler);
     };
   }, [query]);
 
+  // Fetch search results when the debounced query or session token changes
   useEffect(() => {
     const handleSearch = async () => {
       if (!debouncedQuery || !session?.accessToken) {
@@ -39,35 +46,121 @@ const SearchBar = () => {
     handleSearch();
   }, [debouncedQuery, session?.accessToken]);
 
+  // Fetch playlists when the playlists view is shown
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      if (showPlaylists && session?.accessToken) {
+        try {
+          const response = await axios.get('https://api.spotify.com/v1/me/playlists', {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          });
+          setPlaylists(response.data.items);
+        } catch (error) {
+          console.error("Error fetching playlists:", error);
+        }
+      }
+    };
+
+    fetchPlaylists();
+  }, [showPlaylists, session?.accessToken]);
+
+  const handleAddToPlaylist = (track) => {
+    setSelectedTrack(track);
+    setShowPlaylists(true);
+  };
+
+  const handleSelectPlaylist = (playlistId) => {
+    setSelectedPlaylist(playlistId);
+  };
+
+  const handleAddTrackToPlaylist = async () => {
+    if (selectedTrack && selectedPlaylist && session?.accessToken) {
+      try {
+        await addTrackToPlaylist(session.accessToken, selectedPlaylist, selectedTrack.id);
+        alert('Track added to playlist!');
+        setShowPlaylists(false);
+        setSelectedTrack(null);
+        setSelectedPlaylist(null);
+      } catch (error) {
+        console.error("Error adding track to playlist:", error);
+      }
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 mt-11">
-      <div className="w-60 h-20 col-span-1">
+    <div className="relative grid grid-cols-3 gap-4 mt-11">
+      <div className="col-span-2">
         <Input
           type="text"
           label="Search for a track..."
           value={query}
           variant="underlined"
           onChange={(e) => setQuery(e.target.value)}
+          className="bg-gray-800 text-white p-2 rounded w-full"
         />
       </div>
-
-      <div className="grid col-span-2 h-60 overflow-y-auto">
+      <div className="flex items-center justify-end">
+        {selectedTrack && (
+          <button
+            className="bg-green-500 text-white px-4 py-2 rounded"
+            onClick={() => setShowPlaylists(!showPlaylists)}
+          >
+            {showPlaylists ? 'Hide Playlists' : 'Add to Playlist'}
+          </button>
+        )}
+      </div>
+      <div className="col-span-3 grid gap-2">
         {searchResults.length > 0 ? (
           searchResults.map((track) => (
-            <div key={track.id} className="text-white mb-2 grid grid-cols-3 items-center justify-items-start">
-              <Image className="w-20 h-20 col-span-1" src={track.album.images[0].url} alt="Album cover" />
-              <p className="italic font-bold col-span-1">{track.name} by {track.artists[0].name}</p>
-              <div className="flex justify-end">
-                <Button className="w-32 ml-2" id={track.id} color="warning" onClick={() => console.log('Track added to playlist')}>
-                  Add to playlist
-                </Button>
+            <div key={track.id} className="flex items-center p-2 bg-gray-800 rounded">
+              <img src={track.album.images[0]?.url} alt={track.name} className="w-16 h-16 mr-4" />
+              <div className="flex-1">
+                <p className="text-white">{track.name} by {track.artists[0].name}</p>
+                <button
+                  className="bg-blue-500 text-white px-2 py-1 rounded"
+                  onClick={() => handleAddToPlaylist(track)}
+                >
+                  Add to Playlist
+                </button>
               </div>
             </div>
           ))
         ) : (
-          <p className="text-white"></p>
+          <p className="text-white">No results found</p>
         )}
       </div>
+
+      {showPlaylists && (
+        <div className="absolute top-20 left-0 w-full bg-gray-800 p-4 z-10">
+          <h2 className="text-white mb-2">Select a Playlist</h2>
+          <ul>
+            {playlists.map((playlist) => (
+              <li key={playlist.id} className="text-white mb-2">
+                <button
+                  className={`bg-green-500 text-white px-2 py-1 rounded ${selectedPlaylist === playlist.id ? 'bg-green-700' : ''}`}
+                  onClick={() => handleSelectPlaylist(playlist.id)}
+                >
+                  {playlist.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            className="mt-2 bg-blue-500 text-white px-2 py-1 rounded"
+            onClick={handleAddTrackToPlaylist}
+          >
+            Confirm
+          </button>
+          <button
+            className="mt-2 bg-red-500 text-white px-2 py-1 rounded"
+            onClick={() => setShowPlaylists(false)}
+          >
+            Close
+          </button>
+        </div>
+      )}
     </div>
   );
 };
