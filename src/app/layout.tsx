@@ -8,7 +8,6 @@ export default function RootLayout({ children }) {
     <html lang="en" className="dark">
       <head></head>
       <body>
-        {/* Wrap the entire component tree with SessionProvider */}
         <SessionProvider>
           <Providers>
             {children}
