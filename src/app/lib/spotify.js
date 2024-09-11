@@ -1,4 +1,7 @@
 import axios from 'axios';
+// Aqui se escriben las funciones que se encargan de hacer las peticiones a la API de Spotify.
+// Estas funciones se utilizan en los componentes de React para obtener información de la cuenta de Spotify del usuario.
+// Por ejemplo, la función getNowPlaying(token) se utiliza para obtener la canción que el usuario está escuchando actualmente.
 
 const API_BASE_URL = 'https://api.spotify.com/v1';
 
