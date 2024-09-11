@@ -5,7 +5,7 @@ import { getSearchItems, addTrackToPlaylist } from '../lib/spotify';
 import { useSession } from 'next-auth/react';
 import { Input } from "@nextui-org/react";
 import axios from 'axios';
-import { Image } from '@nextui-org/react';
+import { Image, Button } from '@nextui-org/react';
 
 const SearchBar = () => {
   const { data: session } = useSession();
@@ -17,7 +17,7 @@ const SearchBar = () => {
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
 
-  // Debounce the query to prevent frequent API calls
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(query);
@@ -28,7 +28,7 @@ const SearchBar = () => {
     };
   }, [query]);
 
-  // Fetch search results when the debounced query or session token changes
+
   useEffect(() => {
     const handleSearch = async () => {
       if (!debouncedQuery || !session?.accessToken) {
@@ -46,7 +46,7 @@ const SearchBar = () => {
     handleSearch();
   }, [debouncedQuery, session?.accessToken]);
 
-  // Fetch playlists when the playlists view is shown
+
   useEffect(() => {
     const fetchPlaylists = async () => {
       if (showPlaylists && session?.accessToken) {
@@ -98,23 +98,24 @@ const SearchBar = () => {
           value={query}
           variant="underlined"
           onChange={(e) => setQuery(e.target.value)}
-          className="bg-gray-800 text-white p-2 rounded w-full"
+          className=" text-white p-2 rounded w-full"
         />
       </div>
 
-      <div className="col-span-3 grid gap-2">
+      <div className="col-span-3 grid gap-2 h-80 overflow-y-auto">
         {searchResults.length > 0 ? (
           searchResults.map((track) => (
-            <div key={track.id} className="flex items-center p-2 bg-gray-800 rounded">
+            <div key={track.id} className="flex items-center p-2 rounded">
               <Image src={track.album.images[0]?.url} alt={track.name} className="w-16 h-16 mr-4" />
               <div className="flex-1">
                 <p className="text-white">{track.name} by {track.artists[0].name}</p>
-                <button
-                  className="bg-blue-500 text-white px-2 py-1 rounded"
+                <Button
+                  className=" text-white px-2 py-1 rounded"
+                  color =  "warning"
                   onClick={() => handleAddToPlaylist(track)}
                 >
                   Add to Playlist
-                </button>
+                </Button>
               </div>
             </div>
           ))
@@ -129,28 +130,28 @@ const SearchBar = () => {
           <ul className="flex flex-wrap gap-4 mb-4">
             {playlists.map((playlist) => (
               <li key={playlist.id} className="text-white">
-                <button
+                <Button
                   className={`bg-green-500 text-white px-2 py-1 rounded ${selectedPlaylist === playlist.id ? 'bg-green-700' : ''}`}
                   onClick={() => handleSelectPlaylist(playlist.id)}
                 >
                   {playlist.name}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
           <div className="flex space-x-2">
-            <button
+            <Button
               className="bg-blue-500 text-white px-2 py-1 rounded"
               onClick={handleAddTrackToPlaylist}
             >
               Confirm
-            </button>
-            <button
+            </Button>
+            <Button
               className="bg-red-500 text-white px-2 py-1 rounded"
               onClick={() => setShowPlaylists(false)}
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       )}
