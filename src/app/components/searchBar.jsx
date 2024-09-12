@@ -152,6 +152,7 @@ const SearchBar = () => {
                 <p className="text-white">
                   {item.name} 
                   {queryType === 'track' && item.artists?.[0] && ` by ${item.artists[0].name}`}
+                  {queryType === 'album' && item.artists?.[0] && ` by ${item.artists[0].name}`}
                 </p>
                 <a href={item.external_urls.spotify} target="_blank" rel="noopener noreferrer" className="text-green-500 ml-2">
                   <FaSpotify size={24} />
@@ -171,7 +172,7 @@ const SearchBar = () => {
         ) : (
           <p className="text-white"></p>
         )}
-      </div>
+      </div> 
 
       {showPlaylists && (
         <div className="absolute top-20 left-0 w-full bg-gray-800 p-4 z-10 flex flex-col items-start">
