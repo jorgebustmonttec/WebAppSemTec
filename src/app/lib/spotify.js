@@ -45,6 +45,23 @@ export async function getTopArtists(token) {
   });
 }
 
+export async function createPlaylist(token, userId, playlistName, isPublic = true) {
+  const url = `${API_BASE_URL}/users/${userId}/playlists`;
+
+  const data = {
+    name: playlistName,
+    public: isPublic,
+    description: "New playlist created via my app",
+  };
+
+  return axios.post(url, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 export async function getSearchItems(token, query, queryType) {
   return axios.get(`${API_BASE_URL}/search`, {
     headers: {
@@ -54,6 +71,23 @@ export async function getSearchItems(token, query, queryType) {
       q: query,
       type: queryType,
     }
+  });
+}
+
+export const getPlaylistTracks = async (accessToken, playlistId) => {
+  const response = await axios.get(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response;
+};
+
+export async function getUserPlaylists(token) {
+  return axios.get(`${API_BASE_URL}/me/playlists`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 }
 

@@ -111,6 +111,7 @@ const SearchBar = () => {
           variant="underlined"
           onChange={(e) => setQuery(e.target.value)}
           className=" text-white p-2 rounded w-full"
+          style={{ color: 'white' }}
         />
         {query && (
           <button

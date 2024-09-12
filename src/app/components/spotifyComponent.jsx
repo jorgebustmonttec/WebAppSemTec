@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists} from '../lib/spotify';
+import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists, getUserPlaylists, getPlaylistTracks} from '../lib/spotify';
+import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import React from "react";
-import { Avatar, Card, CardBody, Image} from '@nextui-org/react';
-import OracleButton from './oracleButton'; 
+import { Avatar, Card, CardBody, Image, Button, Slider, Input} from '@nextui-org/react'; 
+
+import OracleButton from './oracleButton';
 
 export default function SpotifyComponent() {
   const { data: session } = useSession();
@@ -17,6 +19,11 @@ export default function SpotifyComponent() {
   const [savedAlbums, setSavedAlbums] = useState([]);
   const [topArtists, setTopArtists] = useState([]);
   const [genreCounts, setGenreCounts] = useState({});
+  const [playlistName, setPlaylistName] = useState("");
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState(null);
+  const [playlistTracks, setPlaylistTracks] = useState([]);
+  const [showInput, setShowInput] = useState(false); // Estado para controlar la visibilidad del input
 
   useEffect(() => {
     async function fetchSpotifyData() {
@@ -43,6 +50,9 @@ export default function SpotifyComponent() {
           console.log('CHEQUEO Top Artists Response:', topArtistsResponse);
           setTopArtists(topArtistsResponse.data.items);
 
+          const playlistsResponse = await getUserPlaylists(session.accessToken);
+          setPlaylists(playlistsResponse.data.items);
+
           const genreMap = {};
           topArtistsResponse.data.items.forEach(artist => {
             artist.genres.forEach(genre => {
@@ -59,6 +69,47 @@ export default function SpotifyComponent() {
     fetchSpotifyData();
   }, [session]);
 
+  // Función para crear la playlist
+  const createPlaylist = async () => {
+    if (!playlistName) {
+      alert("Please enter a name for the playlist.");
+      return;
+    }
+    try {
+      const response = await axios.post(
+        `https://api.spotify.com/v1/users/${profile.id}/playlists`,
+        { name: playlistName, description: 'New playlist created from my app', public: false },
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      // Actualizar la lista de playlists
+      const playlistsResponse = await getUserPlaylists(session.accessToken);
+      setPlaylists(playlistsResponse.data.items);
+      setPlaylistName(""); // Limpiar el campo de texto
+      setShowInput(false); // Ocultar el campo de texto después de crear la playlist
+      alert(`Playlist ${playlistName} created successfully!`);
+    } catch (error) {
+      console.error("Error creating playlist:", error);
+      alert("Failed to create playlist.", error);
+    }
+  };
+  const fetchPlaylistTracks = async (playlistId) => {
+    try {
+      const response = await getPlaylistTracks(session.accessToken, playlistId);
+      setPlaylistTracks(response.data.items);
+    } catch (error) {
+      console.error("Error fetching playlist tracks:", error);
+    }
+  };
+  const handlePlaylistClick = (playlistId) => {
+    setSelectedPlaylistId(playlistId);
+    fetchPlaylistTracks(playlistId);
+  };
+
   const genreData = {
     labels: Object.keys(genreCounts),
     datasets: [
@@ -72,10 +123,129 @@ export default function SpotifyComponent() {
     ],
   };
 
+  // Función para eliminar una canción de la playlist
+  const removeTrackFromPlaylist = async (trackUri) => {
+    try {
+      const response = await axios.delete(
+        `https://api.spotify.com/v1/playlists/${selectedPlaylistId}/tracks`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          data: {
+            tracks: [{ uri: trackUri }],
+          },
+        }
+      );
+      alert(`Track removed from playlist!`);
+      // Volver a obtener las canciones de la playlist para actualizar la lista
+      fetchPlaylistTracks(selectedPlaylistId);
+    } catch (error) {
+      console.error("Error removing track:", error);
+      alert("Failed to remove track.");
+    }
+  };
+
   return (
     <div>
+
       <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-      <OracleButton />
+        <OracleButton />
+      </div>
+
+      <div style={{ border: "3px solid #363636", borderRadius: '20px', display: 'flex', height: '300px' }}>
+        {/* Contenedor para Input y Botón */}
+        <div style={{ backgroundColor: '#363636', borderTopLeftRadius: '20px', borderBottomLeftRadius: '20px', display: 'flex', flexDirection: 'column', width: '50%' }}>
+          {/* Botón para Mostrar/Ocultar Input */}
+          {!showInput && (
+            <div style={{ maxHeight: '50px', marginBottom: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h3 style={{ textAlign: 'center', color: '#FFFFFF', fontWeight: 'bold', flex: 1 }}>Playlists</h3>
+              <Button
+                onClick={() => setShowInput(true)} // Mostrar el campo de entrada
+                style={{ backgroundColor: '#1DB954', color: '#FFFFFF', fontSize: '20px', marginLeft: '10px' }}
+              >
+                +
+              </Button>
+            </div>
+          )}
+
+          {/* Input y Botón para Crear Playlist y Cancelar */}
+          {showInput && (
+            <div style={{ maxHeight: '50px', marginBottom: '10px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <Input
+                clearable
+                underlined
+                placeholder="Enter playlist name"
+                aria-label="Playlist name"
+                value={playlistName}
+                onChange={(e) => setPlaylistName(e.target.value)}
+                size="md"
+                className="max-w-[220px]"
+              />
+              <Button
+                onClick={createPlaylist}
+                style={{ backgroundColor: '#1DB954', color: '#FFFFFF', fontSize: '15px', marginLeft: '10px' }}
+              >
+                Create
+              </Button>
+              <Button
+                onClick={() => setShowInput(false)} // Ocultar el campo de entrada
+                style={{ backgroundColor: '#FF0000', color: '#FFFFFF', fontSize: '15px', marginLeft: '10px' }}
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+
+          {/* Playlist Div */}
+          <div style={{ flex: '1' }}>
+            {playlists.length > 0 ? (
+              <ul style={{ paddingLeft: '20px', listStyleType: 'none', maxHeight: '225px', overflowY: 'auto' }}>
+                {playlists.map((playlist) => (
+                  <li key={playlist.id} style={{ marginBottom: '8px', color: '#FFFFFF' }}>
+                    <button
+                      onClick={() => handlePlaylistClick(playlist.id)}
+                      style={{ background: 'none', border: 'none', color: '#1DB954', cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      {playlist.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p style={{ textAlign: 'center', color: '#FFFFFF' }}>No playlists available</p>
+            )}
+          </div>
+        </div>
+
+        {/* Tracks Div */}
+        <div style={{ width: '50%', paddingLeft: '10px' }}>
+          {selectedPlaylistId && (
+            <div>
+              {playlistTracks.length > 0 ? (
+                <ul style={{ paddingLeft: '20px', listStyleType: 'none', marginTop: '10px', maxHeight: '280px', overflowY: 'auto' }}>
+                  {playlistTracks.map((track) => (
+                    <li key={track.track.id} style={{ marginBottom: '8px', color: '#FFFFFF', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 'bold' }}>
+                        {track.track.name} by {track.track.artists[0].name}
+                      </span>
+                      <Button
+                        style={{ backgroundColor: '#FF0000', color: '#FFFFFF' }}
+                        onClick={() => removeTrackFromPlaylist(track.track.uri)}
+                      >
+                        Remove
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ textAlign: 'center', color: '#FFFFFF' }}>No tracks available in this playlist</p>
+              )}
+            </div>
+          )}
+        </div>
+
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: "20px" }}>
