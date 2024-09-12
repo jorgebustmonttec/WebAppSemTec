@@ -6,7 +6,8 @@ import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArti
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import React from "react";
-import { Avatar, Card, CardBody, Image} from '@nextui-org/react'; 
+import { Avatar, Card, CardBody, Image} from '@nextui-org/react';
+import OracleButton from './oracleButton'; 
 
 export default function SpotifyComponent() {
   const { data: session } = useSession();
@@ -73,6 +74,9 @@ export default function SpotifyComponent() {
 
   return (
     <div>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+      <OracleButton />
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: "20px" }}>
 
