@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Input } from "@nextui-org/react";
 import axios from 'axios';
 import { Image } from '@nextui-org/react';
+import { FaSpotify } from 'react-icons/fa';
 
 const SearchBar = () => {
   const { data: session } = useSession();
@@ -16,6 +17,7 @@ const SearchBar = () => {
   const [playlists, setPlaylists] = useState([]);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
+  const [queryType, setQueryType] = useState('track'); // New state for query type
 
   // Debounce the query to prevent frequent API calls
   useEffect(() => {
@@ -35,16 +37,20 @@ const SearchBar = () => {
         return;
       }
 
+      console.log(`Searching for ${debouncedQuery} as ${queryType}`);
       try {
-        const result = await getSearchItems(session.accessToken, debouncedQuery);
-        setSearchResults(result.data.tracks.items);
+        const result = await getSearchItems(session.accessToken, debouncedQuery, queryType);
+        console.log('API response:', result.data);
+        const items = result.data[`${queryType}s`]?.items || [];
+        console.log('Search results:', items);
+        setSearchResults(items);
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
     };
 
     handleSearch();
-  }, [debouncedQuery, session?.accessToken]);
+  }, [debouncedQuery, session?.accessToken, queryType]);
 
   // Fetch playlists when the playlists view is shown
   useEffect(() => {
@@ -56,6 +62,7 @@ const SearchBar = () => {
               Authorization: `Bearer ${session.accessToken}`,
             },
           });
+          console.log('Fetched playlists:', response.data.items);
           setPlaylists(response.data.items);
         } catch (error) {
           console.error("Error fetching playlists:", error);
@@ -89,9 +96,14 @@ const SearchBar = () => {
     }
   };
 
+  const clearSearch = () => {
+    setQuery('');
+    setSearchResults([]);
+  };
+
   return (
     <div className="relative grid grid-cols-3 gap-4 mt-11">
-      <div className="col-span-2">
+      <div className="col-span-2 relative">
         <Input
           type="text"
           label="Search for a track..."
@@ -100,21 +112,58 @@ const SearchBar = () => {
           onChange={(e) => setQuery(e.target.value)}
           className="bg-gray-800 text-white p-2 rounded w-full"
         />
+        {query && (
+          <button
+            className="absolute right-2 top-2 text-white"
+            onClick={clearSearch}
+          >
+            X
+          </button>
+        )}
+      </div>
+
+      <div className="col-span-3 flex justify-center space-x-4 mt-4">
+        <button
+          className={`px-4 py-2 rounded ${queryType === 'track' ? 'bg-blue-500 text-white' : 'bg-gray-500 text-gray-200'}`}
+          onClick={() => setQueryType('track')}
+        >
+          Songs
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${queryType === 'artist' ? 'bg-blue-500 text-white' : 'bg-gray-500 text-gray-200'}`}
+          onClick={() => setQueryType('artist')}
+        >
+          Artists
+        </button>
+        <button
+          className={`px-4 py-2 rounded ${queryType === 'album' ? 'bg-blue-500 text-white' : 'bg-gray-500 text-gray-200'}`}
+          onClick={() => setQueryType('album')}
+        >
+          Albums
+        </button>
       </div>
 
       <div className="col-span-3 grid gap-2">
         {searchResults.length > 0 ? (
-          searchResults.map((track) => (
-            <div key={track.id} className="flex items-center p-2 bg-gray-800 rounded">
-              <Image src={track.album.images[0]?.url} alt={track.name} className="w-16 h-16 mr-4" />
+          searchResults.map((item) => (
+            <div key={item.id} className="flex items-center p-2 bg-gray-800 rounded">
+              <Image src={item.images?.[0]?.url || item.album?.images?.[0]?.url} alt={item.name} className="w-16 h-16 mr-4" />
               <div className="flex-1">
-                <p className="text-white">{track.name} by {track.artists[0].name}</p>
-                <button
-                  className="bg-blue-500 text-white px-2 py-1 rounded"
-                  onClick={() => handleAddToPlaylist(track)}
-                >
-                  Add to Playlist
-                </button>
+                <p className="text-white">
+                  {item.name} 
+                  {queryType === 'track' && item.artists?.[0] && ` by ${item.artists[0].name}`}
+                </p>
+                <a href={item.external_urls.spotify} target="_blank" rel="noopener noreferrer" className="text-green-500 ml-2">
+                  <FaSpotify size={24} />
+                </a>
+                {queryType === 'track' && (
+                  <button
+                    className="bg-blue-500 text-white px-2 py-1 rounded ml-2"
+                    onClick={() => handleAddToPlaylist(item)}
+                  >
+                    Add to Playlist
+                  </button>
+                )}
               </div>
             </div>
           ))

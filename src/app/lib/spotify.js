@@ -45,18 +45,17 @@ export async function getTopArtists(token) {
   });
 }
 
-export async function getSearchItems(token, query) {
+export async function getSearchItems(token, query, queryType) {
   return axios.get(`${API_BASE_URL}/search`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
     params: {
       q: query,
-      type: 'track',
+      type: queryType,
     }
   });
 }
-
 
 export async function getPlaylists(token) {
   try {
