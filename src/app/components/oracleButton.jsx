@@ -4,6 +4,7 @@ export default function TestConnection() {
   const [loading, setLoading] = useState(false);
 
   const handleTest = async () => {
+    setLoading(true); // Set loading to true when the operation starts
     try {
       const getResponse = await fetch('/api/oracle'); // This is correct, don't mess it up.
       const getData = await getResponse.json();
@@ -21,9 +22,10 @@ export default function TestConnection() {
       console.log('Updated Data:', getDataAgain);
     } catch (error) {
       console.error('Something borked:', error);
+    } finally {
+      setLoading(false); // Set loading to false when the operation ends
     }
   };
-  
 
   return (
     <div>

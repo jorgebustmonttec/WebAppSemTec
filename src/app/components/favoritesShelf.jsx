@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 import { FaSpotify, FaTrashAlt } from 'react-icons/fa';
+import Image from 'next/image';
 
 const FavoritesShelf = () => {
   const { data: session } = useSession();
@@ -36,7 +37,7 @@ const FavoritesShelf = () => {
     fetchFavorites();
   }, [session?.accessToken, session?.user?.email]);
 
-  const fetchSpotifyDetails = async (type, id) => {
+  const fetchSpotifyDetails = useCallback(async (type, id) => {
     if (!id) return null;
     try {
       const response = await axios.get(`https://api.spotify.com/v1/${type}s/${id}`, {
@@ -49,7 +50,7 @@ const FavoritesShelf = () => {
       console.error(`Error fetching ${type} details:`, error);
       return null;
     }
-  };
+  }, [session?.accessToken]);
 
   const [albumDetails, setAlbumDetails] = useState(null);
   const [artistDetails, setArtistDetails] = useState(null);
@@ -72,7 +73,7 @@ const FavoritesShelf = () => {
     };
 
     fetchDetails();
-  }, [favorites]);
+  }, [favorites, fetchSpotifyDetails]);
 
   const handleRemoveFavorite = async (type) => {
     if (session?.user?.email) {
@@ -108,7 +109,7 @@ const FavoritesShelf = () => {
     return (
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', width: '100%', height: 'calc(100% / 3 - 10px)', padding: '5px 0' }}>
         <div style={{ width: 'auto', height: '100%', borderRadius: '8px', backgroundColor: '#4682B4', marginRight: '10px', aspectRatio: '1' }}>
-          <img src={imageUrl} alt={details.name} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
+          <Image src={imageUrl} alt={details.name} width={100} height={100} style={{ borderRadius: '8px' }} />
         </div>
         <div style={{ color: '#FFFFFF', flex: 1 }}>
           <p style={{ margin: 0, fontWeight: 'bold' }}>Favorite {type}</p>

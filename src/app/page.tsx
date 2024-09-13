@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import LoginButton from './components/loginButton';
 import { NextUIProvider } from '@nextui-org/react';
 import SpotifyComponent from './components/spotifyComponent';
@@ -12,18 +11,18 @@ export default function Home() {
   if (status === 'loading') return <div>Loading...</div>;
   if (!session) return (
     <NextUIProvider>
-    <div className="relative min-h-screen bg-black text-white">
-      <main className="p-10">
-        <div className="absolute top-5 right-1/2 transform translate-x-1/2 flex items-center">
-          <h1 className="text-4xl font-bold text-white">Factorify</h1>
-        </div>
-        <div className="absolute top-5 right-5 flex items-center">
-          <LoginButton />
-          <p className = "justify-center">Favor de iniciar sesion para comenzar.</p>
-        </div>
-      </main>
-    </div>
-  </NextUIProvider>
+      <div className="relative min-h-screen bg-black text-white">
+        <main className="p-10">
+          <div className="absolute top-5 right-1/2 transform translate-x-1/2 flex items-center">
+            <h1 className="text-4xl font-bold text-white">Factorify</h1>
+          </div>
+          <div className="absolute top-5 right-5 flex items-center">
+            <LoginButton />
+            <p className="justify-center">Favor de iniciar sesion para comenzar.</p>
+          </div>
+        </main>
+      </div>
+    </NextUIProvider>
   );
 
   if (status === 'authenticated') {
@@ -51,5 +50,4 @@ export default function Home() {
       </NextUIProvider>
     );
   }
-
 }

@@ -5,9 +5,8 @@ import { useSession } from 'next-auth/react';
 import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists, getUserPlaylists, getPlaylistTracks } from '../lib/spotify';
 import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
-import Chart from 'chart.js/auto';
 import React from "react";
-import { Avatar, Card, CardBody, Image, Button, Slider, Input } from '@nextui-org/react';
+import { Avatar, Card, CardBody, Image, Button, Input } from '@nextui-org/react';
 
 import OracleButton from './oracleButton';
 import FavoritesShelf from './favoritesShelf';
@@ -77,7 +76,7 @@ export default function SpotifyComponent() {
       return;
     }
     try {
-      const response = await axios.post(
+      await axios.post(
         `https://api.spotify.com/v1/users/${profile.id}/playlists`,
         { name: playlistName, description: 'New playlist created from my app', public: false },
         {
@@ -98,6 +97,7 @@ export default function SpotifyComponent() {
       alert("Failed to create playlist.", error);
     }
   };
+
   const fetchPlaylistTracks = async (playlistId) => {
     try {
       const response = await getPlaylistTracks(session.accessToken, playlistId);
@@ -106,6 +106,7 @@ export default function SpotifyComponent() {
       console.error("Error fetching playlist tracks:", error);
     }
   };
+
   const handlePlaylistClick = (playlistId) => {
     setSelectedPlaylistId(playlistId);
     fetchPlaylistTracks(playlistId);
@@ -127,7 +128,7 @@ export default function SpotifyComponent() {
   // Función para eliminar una canción de la playlist
   const removeTrackFromPlaylist = async (trackUri) => {
     try {
-      const response = await axios.delete(
+      await axios.delete(
         `https://api.spotify.com/v1/playlists/${selectedPlaylistId}/tracks`,
         {
           headers: {
