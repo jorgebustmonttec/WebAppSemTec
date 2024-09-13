@@ -348,7 +348,7 @@ export default function SpotifyComponent() {
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: "20px", flexWrap: 'wrap', height: '300px' }}>
         <div style={{ flex: '1 1 70%', minWidth: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <h3 style={{ textAlign: 'center', color: '#FFFFFF', marginBottom: '10px', fontWeight: 'bold' }}>
-            Genre Counts
+            Genre CountsAA
           </h3>
           <div style={{ width: '100%', flex: 1, padding: '0 20px' }}>
             <Bar 
