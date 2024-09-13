@@ -7,6 +7,11 @@ import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import React from "react";
 import { Avatar, Card, CardBody, Image, Button, Input } from '@nextui-org/react';
+import { Chart, registerables } from 'chart.js';
+
+// Register all necessary components
+Chart.register(...registerables);
+
 
 import OracleButton from './oracleButton';
 import FavoritesShelf from './favoritesShelf';
