@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists, getUserPlaylists, getPlaylistTracks} from '../lib/spotify';
+import { getNowPlaying, getUserProfile, getTopTracks, getSavedAlbums, getTopArtists, getUserPlaylists, getPlaylistTracks } from '../lib/spotify';
 import axios from 'axios';
 import { Bar } from 'react-chartjs-2';
 import Chart from 'chart.js/auto';
 import React from "react";
-import { Avatar, Card, CardBody, Image, Button, Slider, Input} from '@nextui-org/react'; 
+import { Avatar, Card, CardBody, Image, Button, Slider, Input } from '@nextui-org/react';
 
 import OracleButton from './oracleButton';
+import FavoritesShelf from './favoritesShelf';
 
 export default function SpotifyComponent() {
   const { data: session } = useSession();
@@ -332,54 +333,60 @@ export default function SpotifyComponent() {
               ) : (
                 <p style={{ textAlign: "center", color: "#FFFFFF" }}>No saved albums available</p>
               )}
-            </div>
+          </div>
           </CardBody>
         </Card>
 
       </div>
 
-      <div style={{ marginTop: "20px" }}>
-       <h3 style={{ textAlign: 'center', color: '#FFFFFF', marginBottom: '10px', fontWeight: 'bold' }}>
-          Genre Counts
-        </h3>
-        <div style={{ width: '80%', margin: '0 auto' }}>
-          <Bar 
-            data={genreData}
-            options={{
-              responsive: true,
-              plugins: {
-                legend: {
-                  labels: {
-                    color: '#FFFFFF' // Cambia el color de las etiquetas de la leyenda
-                  }
-                }
-              },
-              scales: {
-                x: {
-                  ticks: {
-                    color: '#FFFFFF' // Cambia el color de las etiquetas del eje x
-                  },
-                  grid: {
-                    color: '#FFFFFF' // Cambia el color de las líneas de la cuadrícula del eje x
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: "20px", flexWrap: 'wrap', height: '300px' }}>
+        <div style={{ flex: '1 1 70%', minWidth: '300px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h3 style={{ textAlign: 'center', color: '#FFFFFF', marginBottom: '10px', fontWeight: 'bold' }}>
+            Genre Counts
+          </h3>
+          <div style={{ width: '100%', flex: 1, padding: '0 20px' }}>
+            <Bar 
+              data={genreData}
+              options={{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    labels: {
+                      color: '#FFFFFF' // Cambia el color de las etiquetas de la leyenda
+                    }
                   }
                 },
-                y: {
-                  ticks: {
-                    color: '#FFFFFF' // Cambia el color de las etiquetas del eje y
+                scales: {
+                  x: {
+                    ticks: {
+                      color: '#FFFFFF' // Cambia el color de las etiquetas del eje x
+                    },
+                    grid: {
+                      color: '#FFFFFF' // Cambia el color de las líneas de la cuadrícula del eje x
+                    }
                   },
-                  grid: {
-                    color: '#FFFFFF' // Cambia el color de las líneas de la cuadrícula del eje y
+                  y: {
+                    ticks: {
+                      color: '#FFFFFF' // Cambia el color de las etiquetas del eje y
+                    },
+                    grid: {
+                      color: '#FFFFFF' // Cambia el color de las líneas de la cuadrícula del eje y
+                    }
                   }
                 }
-              }
-            }}
-            // Aquí defines el color de las barras
-            plugins={{
-              datalabels: {
-                color: '#FFFFFF' // Cambia el color de las etiquetas de datos
-              }
-            }}
-          />
+              }}
+              // Aquí defines el color de las barras
+              plugins={{
+                datalabels: {
+                  color: '#FFFFFF' // Cambia el color de las etiquetas de datos
+                }
+              }}
+            />
+          </div>
+        </div>
+        <div style={{ flex: '1 1 30%', minWidth: '300px', height: '100%' }}>
+          <FavoritesShelf />
         </div>
       </div>
 
