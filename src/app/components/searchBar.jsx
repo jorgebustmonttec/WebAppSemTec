@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Input } from "@nextui-org/react";
 import axios from 'axios';
 import { Image, Button } from '@nextui-org/react';
-import { FaSpotify } from 'react-icons/fa';
+import { FaSpotify, FaHeart } from 'react-icons/fa';
 
 const SearchBar = () => {
   const { data: session } = useSession();
@@ -19,7 +19,6 @@ const SearchBar = () => {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [queryType, setQueryType] = useState('track'); // New state for query type
 
-
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(query);
@@ -29,7 +28,6 @@ const SearchBar = () => {
       clearTimeout(handler);
     };
   }, [query]);
-
 
   useEffect(() => {
     const handleSearch = async () => {
@@ -51,7 +49,6 @@ const SearchBar = () => {
 
     handleSearch();
   }, [debouncedQuery, session?.accessToken, queryType]);
-
 
   useEffect(() => {
     const fetchPlaylists = async () => {
@@ -92,6 +89,26 @@ const SearchBar = () => {
         setSelectedPlaylist(null);
       } catch (error) {
         console.error("Error adding track to playlist:", error);
+      }
+    }
+  };
+
+  const handleSetFavorite = async (item) => {
+    if (session?.user?.email) {
+      try {
+        const updates = {};
+        if (queryType === 'track') {
+          updates.trackId = item.id;
+        } else if (queryType === 'artist') {
+          updates.artistId = item.id;
+        } else if (queryType === 'album') {
+          updates.albumId = item.id;
+        }
+
+        await axios.put(`/api/oracle?email=${session.user.email}`, updates);
+        alert('Favorite updated!');
+      } catch (error) {
+        console.error("Error updating favorite:", error);
       }
     }
   };
@@ -167,6 +184,12 @@ const SearchBar = () => {
                     Add to Playlist
                   </Button>
                 )}
+                <button
+                  className="ml-2 text-red-500"
+                  onClick={() => handleSetFavorite(item)}
+                >
+                  <FaHeart size={24} />
+                </button>
               </div>
             </div>
           ))

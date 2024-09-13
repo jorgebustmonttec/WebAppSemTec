@@ -24,8 +24,8 @@ const FavoritesShelf = () => {
           });
           const { rows } = response.data;
           if (rows.length > 0) {
-            const { songId, albumId, artistId } = JSON.parse(rows[0].favorites);
-            setFavorites({ album: albumId, artist: artistId, track: songId });
+            const { trackId, albumId, artistId } = JSON.parse(rows[0].favorites);
+            setFavorites({ album: albumId, artist: artistId, track: trackId });
           }
         } catch (error) {
           console.error('Error fetching user favorites:', error);
@@ -74,6 +74,21 @@ const FavoritesShelf = () => {
     fetchDetails();
   }, [favorites]);
 
+  const handleRemoveFavorite = async (type) => {
+    if (session?.user?.email) {
+      try {
+        await axios.delete(`/api/oracle?email=${session.user.email}&field=${type}Id`);
+        setFavorites((prevFavorites) => ({
+          ...prevFavorites,
+          [type]: null,
+        }));
+        alert('Favorite removed!');
+      } catch (error) {
+        console.error(`Error removing favorite ${type}:`, error);
+      }
+    }
+  };
+
   const renderFavorite = (type, details) => {
     if (!details) {
       return (
@@ -87,20 +102,29 @@ const FavoritesShelf = () => {
       );
     }
 
+    const imageUrl = type === 'track' ? details.album?.images?.[0]?.url : details.images?.[0]?.url;
+    const artistName = type === 'track' ? details.artists?.[0]?.name : type === 'album' ? details.artists?.[0]?.name : null;
+
     return (
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', width: '100%', height: 'calc(100% / 3 - 10px)', padding: '5px 0' }}>
         <div style={{ width: 'auto', height: '100%', borderRadius: '8px', backgroundColor: '#4682B4', marginRight: '10px', aspectRatio: '1' }}>
-          <img src={details.images?.[0]?.url} alt={details.name} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
+          <img src={imageUrl} alt={details.name} style={{ width: '100%', height: '100%', borderRadius: '8px' }} />
         </div>
         <div style={{ color: '#FFFFFF', flex: 1 }}>
           <p style={{ margin: 0, fontWeight: 'bold' }}>Favorite {type}</p>
-          <p style={{ margin: 0 }}>{details.name}</p>
+          <p style={{ margin: 0 }}>
+            {details.name}
+            {artistName && ` by ${artistName}`}
+          </p>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginLeft: '' }}>
           <a href={details.external_urls.spotify} target="_blank" rel="noopener noreferrer" style={{ backgroundColor: '#1DB954', border: 'none', borderRadius: '50%', width: '30px', height: '30px', marginBottom: '5px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <FaSpotify color="white" size={20} />
           </a>
-          <button style={{ backgroundColor: '#FF0000', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <button
+            style={{ backgroundColor: '#FF0000', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+            onClick={() => handleRemoveFavorite(type)}
+          >
             <FaTrashAlt color="white" size={20} />
           </button>
         </div>
@@ -111,9 +135,9 @@ const FavoritesShelf = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', backgroundColor: '#363636', borderRadius: '10px', padding: '10px', height: '100%' }}>
       <h3 style={{ color: '#FFFFFF', marginBottom: '10px', fontWeight: 'bold' }}>Favorites</h3>
-      {renderFavorite('Album', albumDetails)}
-      {renderFavorite('Artist', artistDetails)}
-      {renderFavorite('Track', trackDetails)}
+      {renderFavorite('album', albumDetails)}
+      {renderFavorite('artist', artistDetails)}
+      {renderFavorite('track', trackDetails)}
     </div>
   );
 };
