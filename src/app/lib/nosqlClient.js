@@ -8,7 +8,7 @@ const client = new NoSQLClient({
       tenantId: process.env.ORACLE_TENANT_ID,
       userId: process.env.ORACLE_USER_ID,
       fingerprint: process.env.ORACLE_FINGERPRINT,
-      privateKey: process.env.ORACLE_PRIVATE_KEY.replace(/\\n/g, '\n')
+      privateKey: process.env.ORACLE_PRIVATE_KEY
     }
   }
 });
